@@ -231,7 +231,7 @@ contract ExternallyControlledDripper {
     function dripReward(address to) public {
         if (lastRewardBlock[to] >= block.number) return;
         require(
-            to == requestors[0] || to == requestors[1],
+            msg.sender == requestors[0] || msg.sender == requestors[1],
             "RewardDripper/invalid-caller"
         );
 

@@ -301,19 +301,23 @@ contract ExternallyControlledDripperTest is DSTest {
         update_rates_to_1_eth_per_block();
 
         hevm.roll(block.number + 1);
-        dripper.dripReward(address(bob));
+        hevm.prank(address(bob));
+        dripper.dripReward();
         assertEq(coin.balanceOf(address(bob)), 1 ether);
         assertEq(coin.balanceOf(address(alice)), 0);
 
         hevm.roll(block.number + 1);
+        hevm.prank(address(alice));
         dripper.dripReward(address(alice));
         assertEq(coin.balanceOf(address(bob)), 1 ether);
         assertEq(coin.balanceOf(address(alice)), 2 ether);
 
         hevm.roll(block.number + 10);
+        hevm.prank(address(bob));
         dripper.dripReward(address(bob));
         assertEq(coin.balanceOf(address(bob)), 12 ether);
         assertEq(coin.balanceOf(address(alice)), 2 ether);
+        hevm.prank(address(alice));
         dripper.dripReward(address(alice));
         assertEq(coin.balanceOf(address(bob)), 12 ether);
         assertEq(coin.balanceOf(address(alice)), 12 ether);
@@ -322,12 +326,15 @@ contract ExternallyControlledDripperTest is DSTest {
     function test_drip_rewards_same_block() public {
         update_rates_to_1_eth_per_block();
         hevm.roll(block.number + 1);
+        hevm.prank(address(bob));
+        dripper.dripReward();
+        assertEq(coin.balanceOf(address(bob)), 1 ether);
+
+        hevm.prank(address(bob));
         dripper.dripReward(address(bob));
         assertEq(coin.balanceOf(address(bob)), 1 ether);
 
-        dripper.dripReward(address(bob));
-        assertEq(coin.balanceOf(address(bob)), 1 ether);
-
+        hevm.prank(address(bob));
         dripper.dripReward(address(bob));
         assertEq(coin.balanceOf(address(bob)), 1 ether);
     }
@@ -335,7 +342,7 @@ contract ExternallyControlledDripperTest is DSTest {
     function testFail_drip_rewards_invalid_caller() public {
         update_rates_to_1_eth_per_block();
         hevm.roll(block.number + 1);
-        dripper.dripReward(address(0x0dd));
+        dripper.dripReward(address(alice));
     }
 
     function test_update_rate() public {
